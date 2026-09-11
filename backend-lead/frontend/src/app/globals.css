@@ -1,0 +1,91 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f3f6;
+  --color-border: #e3e6eb;
+  --color-border-strong: #c9ced6;
+  --color-fg: #14181f;
+  --color-fg-muted: #5b6472;
+  --color-fg-subtle: #8a93a1;
+  --color-accent: #1f5eff;
+  --color-accent-strong: #1747c7;
+  --color-accent-soft: #e6edff;
+  --color-success: #12805c;
+  --color-success-soft: #e2f5ec;
+  --color-warning: #a35d00;
+  --color-warning-soft: #fff3df;
+  --color-danger: #c0392b;
+  --color-danger-soft: #fdeae7;
+  --color-info: #3b5b8c;
+  --color-info-soft: #e8eef8;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+
+  --shadow-card: 0 1px 2px rgb(20 24 31 / 0.04), 0 1px 8px rgb(20 24 31 / 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0f1216;
+    --color-surface: #161a20;
+    --color-surface-muted: #1d222a;
+    --color-border: #262c35;
+    --color-border-strong: #364050;
+    --color-fg: #eef1f5;
+    --color-fg-muted: #a7b0bd;
+    --color-fg-subtle: #737d8b;
+    --color-accent: #5b8cff;
+    --color-accent-strong: #7aa2ff;
+    --color-accent-soft: #1b2745;
+    --color-success: #3ccf91;
+    --color-success-soft: #123326;
+    --color-warning: #f1b04c;
+    --color-warning-soft: #3a2a0d;
+    --color-danger: #ff7b6e;
+    --color-danger-soft: #401b18;
+    --color-info: #9db7e6;
+    --color-info-soft: #1a2536;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Money and identifiers read better in tabular figures. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-enter {
+  animation: toast-in 160ms ease-out;
+}

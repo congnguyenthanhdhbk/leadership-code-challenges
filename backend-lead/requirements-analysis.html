@@ -1,0 +1,657 @@
+<title>Mini Wallet Build Plan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #F5F7F6;
+    --surface: #FFFFFF;
+    --surface-2: #ECF1EE;
+    --ink: #1A231F;
+    --muted: #5D6C66;
+    --line: #D5DED9;
+    --rule: #B9C7C0;
+    --accent: #0F6B5C;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #DFEDE8;
+    --warn: #96660F;
+    --warn-soft: #F6ECD6;
+    --crit: #A33636;
+    --crit-soft: #F7E3E3;
+    --code-bg: #EDF1EF;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101815;
+      --surface: #17201D;
+      --surface-2: #1E2A25;
+      --ink: #E3EAE6;
+      --muted: #94A49D;
+      --line: #2B3933;
+      --rule: #3A4B44;
+      --accent: #4CB89E;
+      --accent-ink: #0C1512;
+      --accent-soft: #1B332C;
+      --warn: #D9A94F;
+      --warn-soft: #33290F;
+      --crit: #E08C8C;
+      --crit-soft: #3A1D1D;
+      --code-bg: #1E2A25;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #101815;
+    --surface: #17201D;
+    --surface-2: #1E2A25;
+    --ink: #E3EAE6;
+    --muted: #94A49D;
+    --line: #2B3933;
+    --rule: #3A4B44;
+    --accent: #4CB89E;
+    --accent-ink: #0C1512;
+    --accent-soft: #1B332C;
+    --warn: #D9A94F;
+    --warn-soft: #33290F;
+    --crit: #E08C8C;
+    --crit-soft: #3A1D1D;
+    --code-bg: #1E2A25;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    padding-inline: clamp(16px, 4vw, 40px);
+    padding-block: 32px 72px;
+  }
+  .page { max-width: 1040px; margin-inline: auto; }
+  h1, h2, h3 {
+    font-family: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h1 { font-size: clamp(30px, 4.4vw, 44px); font-weight: 800; }
+  h2 { font-size: clamp(22px, 2.6vw, 28px); }
+  h3 { font-size: 18px; }
+  p { margin: 0; max-width: 72ch; }
+  a { color: var(--accent); }
+  code, pre, .mono {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.92em;
+  }
+  code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 3px; }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    line-height: 1.45;
+    margin: 0;
+  }
+  pre code { background: none; padding: 0; }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+
+  /* header */
+  .masthead { display: grid; gap: 14px; padding-bottom: 28px; border-bottom: 2px solid var(--ink); }
+  .masthead .lede { font-size: 18px; color: var(--muted); max-width: 66ch; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 14px; color: var(--muted); }
+  .facts b { color: var(--ink); font-weight: 600; }
+
+  /* budget ruler */
+  .ruler { display: grid; gap: 8px; margin-top: 26px; }
+  .ruler-bar { display: flex; height: 30px; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; background: var(--surface); }
+  .ruler-bar span {
+    display: grid; place-items: center; font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em;
+    border-right: 1px solid var(--rule); background: var(--surface-2); color: var(--ink); white-space: nowrap; overflow: hidden;
+    font-variant-numeric: tabular-nums;
+  }
+  .ruler-bar span:last-child { border-right: 0; }
+  .ruler-bar span.code { background: var(--accent-soft); }
+  .ruler-bar span.words { background: var(--warn-soft); }
+  .ruler-ticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* sections */
+  section { margin-top: 56px; display: grid; gap: 18px; }
+  .sec-head { display: grid; gap: 6px; }
+  .sec-head p { color: var(--muted); }
+
+  /* tables */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--surface-2); }
+  tr:last-child td { border-bottom: 0; }
+  td.k { font-weight: 600; white-space: nowrap; }
+  .tbl-wrap p { max-width: none; }
+
+  .tag {
+    display: inline-block; font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 3px; white-space: nowrap;
+  }
+  .tag.crit { background: var(--crit-soft); color: var(--crit); }
+  .tag.warn { background: var(--warn-soft); color: var(--warn); }
+  .tag.ok   { background: var(--accent-soft); color: var(--accent); }
+  .tag.dim  { background: var(--surface-2); color: var(--muted); }
+
+  /* callouts */
+  .note {
+    border-left: 3px solid var(--accent); background: var(--surface); padding: 12px 16px; border-radius: 0 6px 6px 0;
+    display: grid; gap: 6px;
+  }
+  .note.warn { border-left-color: var(--warn); }
+  .note.crit { border-left-color: var(--crit); }
+  .note p { max-width: 80ch; }
+
+  /* two-column lists */
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+  .block { display: grid; gap: 8px; align-content: start; }
+  ul, ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+  li { max-width: 72ch; }
+  li > ul { margin-top: 4px; }
+
+  /* phases */
+  .phase { border: 1px solid var(--line); border-radius: 6px; background: var(--surface); overflow: hidden; }
+  .phase-head {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: baseline;
+    padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--line);
+  }
+  .phase-num { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 22px; color: var(--accent); line-height: 1; }
+  .phase-head h3 { font-size: 17px; }
+  .phase-time { font-size: 13px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .phase-body { padding: 14px 16px; display: grid; gap: 12px; }
+  .checks { list-style: none; padding: 0; display: grid; gap: 6px; }
+  .checks li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; max-width: none; }
+  .checks input { margin: 4px 0 0; accent-color: var(--accent); width: 16px; height: 16px; }
+  .checks label { cursor: pointer; }
+  .checks input:checked + label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--rule); }
+  .commit { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .commit code { font-size: 12.5px; }
+  .why { font-size: 14px; color: var(--muted); max-width: 80ch; }
+
+  .state { font-size: 13.5px; }
+  .foot { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (max-width: 560px) {
+    .phase-head { grid-template-columns: auto 1fr; }
+    .phase-time { grid-column: 2; }
+  }
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <div class="eyebrow">Backend Lead take-home · 99Tech · delivery plan</div>
+    <h1>Mini Wallet Build Plan</h1>
+    <p class="lede">A four-hour plan for the deposit → wager → withdrawal exercise, built around the invariants a real-money wallet must never break and the written reasoning a senior lead is actually graded on.</p>
+    <div class="facts">
+      <span><b>Budget</b> 4h: 3h code, 45m design note, 15m slack</span>
+      <span><b>Stack</b> TypeScript · Express · Sequelize · Postgres 16 · Jest</span>
+      <span><b>Money</b> <span class="mono">DECIMAL(36,18)</span>, strings at the edge, BigNumber inside</span>
+    </div>
+
+    <div class="ruler" aria-label="Time budget by phase">
+      <div class="ruler-bar">
+        <span class="code" style="flex:10" title="Setup 10m">Setup</span>
+        <span class="code" style="flex:30" title="Schema 30m">Schema 30</span>
+        <span class="code" style="flex:15" title="Deposit 15m">A1</span>
+        <span class="code" style="flex:45" title="Callback 45m">A2 callback 45</span>
+        <span class="code" style="flex:20" title="Wagers 20m">A3</span>
+        <span class="code" style="flex:20" title="Withdrawals 20m">A4</span>
+        <span class="code" style="flex:40" title="Tests 40m">Tests 40</span>
+        <span class="words" style="flex:15" title="DECISIONS 15m">DEC</span>
+        <span class="words" style="flex:45" title="Part B 45m">Part B 45</span>
+      </div>
+      <div class="ruler-ticks"><span>0:00</span><span>1:00</span><span>2:00</span><span>3:00</span><span>4:00</span></div>
+    </div>
+  </header>
+
+  <!-- 1. How this is graded -->
+  <section id="brief">
+    <div class="sec-head">
+      <h2>How the reviewer will read the submission</h2>
+      <p>The brief names its evaluation lens outright. Plan the work in the order a reviewer reads it, not in the order the endpoints are listed.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Reviewer opens</th><th>What they are looking for</th><th>Weight in the brief</th></tr></thead>
+        <tbody>
+          <tr><td class="k">DECISIONS.md</td><td>Locking strategy and the road not taken, schema reasoning, explicit rulings on every ambiguity, honest AI disclosure, a credible next-steps list.</td><td><span class="tag crit">weighted heavily</span></td></tr>
+          <tr><td class="k">test/</td><td>Whether the four named risks are proven with real concurrency against Postgres, and whether a ledger invariant is asserted rather than assumed.</td><td><span class="tag crit">named minimum</span></td></tr>
+          <tr><td class="k">PSP callback service</td><td>Exactly-once credit under duplicate and concurrent delivery, an explicit state machine, one transaction per money movement.</td><td><span class="tag crit">core of Part A</span></td></tr>
+          <tr><td class="k">DESIGN-PSP.md</td><td>An abstraction that isolates provider quirks, config-driven onboarding, and a CI strategy for providers you cannot call.</td><td><span class="tag crit">Part B</span></td></tr>
+          <tr><td class="k">git log</td><td>Small, ordered commits that tell the story. Reasoning committed alongside code, not reconstructed at the end.</td><td><span class="tag warn">delivery requirement</span></td></tr>
+          <tr><td class="k">Routes, Docker, auth</td><td>Explicitly not graded. Thin routes that validate and delegate are enough.</td><td><span class="tag dim">ignore</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <b>The senior-lead bar</b>
+      <p>A mid-level submission makes the endpoints work. A senior submission states the invariants first, enforces each one at more than one layer, names every assumption it had to invent, and resists building anything the brief did not ask for. Judgment is the deliverable. The code is evidence for it.</p>
+    </div>
+  </section>
+
+  <!-- 2. Invariants -->
+  <section id="invariants">
+    <div class="sec-head">
+      <h2>Invariants and where each is enforced</h2>
+      <p>Six properties the wallet must hold. Each gets a structural guard in the database, a behavioural guard in the service, and a test that would fail if either were removed. Write these into DECISIONS.md verbatim.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Invariant</th><th>Database layer</th><th>Service layer</th><th>Test that proves it</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="k">I1 · A completed deposit credits exactly once</td>
+            <td><code>UNIQUE (psp_ref)</code> on funding transactions.</td>
+            <td>Lock the funding row with <code>FOR UPDATE</code>, then apply the state guard. A second delivery waits, sees Completed, and returns an idempotent 200 without writing.</td>
+            <td>Sequential duplicate; N concurrent duplicates via <code>Promise.all</code>. Assert one ledger row, balance equals amount.</td>
+          </tr>
+          <tr>
+            <td class="k">I2 · Balance never goes negative</td>
+            <td><code>CHECK (balance &gt;= 0)</code> on wallets.</td>
+            <td>Lock the wallet row, compare with BigNumber, debit in the same transaction. Loser gets 422, not a partial write.</td>
+            <td>Balance 100, ten concurrent wagers of 15. Exactly six succeed, balance is 10.</td>
+          </tr>
+          <tr>
+            <td class="k">I3 · Ledger reconstructs balance</td>
+            <td>Append-only <code>wallet_txs</code> with signed <code>amount</code> and <code>balance_after</code>. No UPDATE or DELETE path exists in code.</td>
+            <td>Every balance change and its ledger row are written in one transaction. Nothing touches <code>balance</code> outside that path.</td>
+            <td>After a mixed scenario, <code>SUM(amount)</code> over the ledger equals <code>wallets.balance</code>, and the last <code>balance_after</code> matches.</td>
+          </tr>
+          <tr>
+            <td class="k">I4 · State transitions are explicit</td>
+            <td>Status stored as an enum with three values.</td>
+            <td>One <code>transition(tx, to)</code> function owns the allowed edges. Repeat of the applied outcome is a no-op; a conflicting outcome is a 409.</td>
+            <td>Callback <code>failed</code> after Completed is rejected and changes nothing.</td>
+          </tr>
+          <tr>
+            <td class="k">I5 · Withdrawal only when turnover is met</td>
+            <td><code>turnover_required</code> and <code>turnover_accrued</code> columns on wallets, both non-negative.</td>
+            <td>Under the wallet lock: if accrued &lt; required, return 422 with the outstanding figure. Deposit completion adds to required; each wager adds to accrued.</td>
+            <td>Blocked with the right outstanding amount, then unblocked after wagers reach the threshold.</td>
+          </tr>
+          <tr>
+            <td class="k">I6 · Money never touches a JS number</td>
+            <td><code>DECIMAL(36,18)</code> everywhere; pg returns strings.</td>
+            <td>Zod validates amounts as decimal strings with at most 18 fractional digits. All arithmetic via <code>lib/money.ts</code>.</td>
+            <td>Pre-submission grep for <code>parseFloat</code>, <code>Number(</code>, <code>+amount</code> in <code>src/</code> returns nothing.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. Rulings -->
+  <section id="rulings">
+    <div class="sec-head">
+      <h2>Rulings on what the brief leaves open</h2>
+      <p>The root readme says gaps are deliberate and that how you frame a missing constraint is part of what is read. Decide these before writing code, record each in DECISIONS.md the moment it is applied.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Question</th><th>Ruling</th><th>Why this and not the alternative</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="k">Callback amount differs from deposit amount</td>
+            <td>Credit the <b>settled</b> amount from the callback. Persist both <code>amount</code> and <code>settled_amount</code>, set <code>amount_mismatch = true</code>, and log at warn level for reconciliation.</td>
+            <td>The callback is what the PSP says actually moved. Crediting the requested amount invents money or hides a shortfall. Parking the transaction in a review state is the other defensible answer; it costs a fourth state and an approval path the brief said not to build. Name it as the production choice in next steps.</td>
+          </tr>
+          <tr>
+            <td class="k">Unknown <code>pspRef</code></td>
+            <td>Persist the raw callback in a <code>psp_callbacks</code> inbox table with outcome <code>orphan</code>, respond 404.</td>
+            <td>Nothing to lock, nothing to credit. Storing the raw payload means a late deposit row or a support case can still be matched. In production many PSPs retry on non-2xx forever, so a 200 acknowledgement is the likely real answer; say so.</td>
+          </tr>
+          <tr>
+            <td class="k">Repeat callback with the same outcome</td>
+            <td>200, idempotent no-op, echo the current state.</td>
+            <td>Retries must be safe to acknowledge. Returning 409 would cause retry storms.</td>
+          </tr>
+          <tr>
+            <td class="k">Callback conflicting with a terminal state</td>
+            <td>409 <code>invalid_transition</code>, no write, inbox row records the rejection.</td>
+            <td>Silently applying it is the failure the brief names. A loud reject is what the state machine is for.</td>
+          </tr>
+          <tr>
+            <td class="k">Withdrawal larger than balance</td>
+            <td>422 <code>insufficient_balance</code>, checked after the turnover gate under the same lock.</td>
+            <td>The brief only mentions the turnover check, but a wallet that never loses money cannot let a withdrawal overdraw. Turnover first because it is the anti-abuse control and its 422 body is specified.</td>
+          </tr>
+          <tr>
+            <td class="k">Does a withdrawal reset turnover?</td>
+            <td>No. Required and accrued are lifetime counters; outstanding is <code>max(required − accrued, 0)</code>.</td>
+            <td>Simplest model that satisfies the rule as written. Real platforms often reset on withdrawal or per deposit; flag as an open product question.</td>
+          </tr>
+          <tr>
+            <td class="k"><code>turnoverMultiplier</code> of 0</td>
+            <td>Allowed. Adds nothing to required turnover.</td>
+            <td>The brief says integer ≥ 0. Useful for the test scenario too.</td>
+          </tr>
+          <tr>
+            <td class="k">Failed deposit and turnover</td>
+            <td>Adds no requirement. Only completion changes wallet state.</td>
+            <td>No money arrived, so nothing to lock against.</td>
+          </tr>
+          <tr>
+            <td class="k">Precision of <code>amount</code></td>
+            <td>Regex <code>^\d+(\.\d{1,18})?$</code>, must be &gt; 0. More than 18 decimals is a 400.</td>
+            <td>Anything the column cannot hold exactly should be rejected at the edge, not rounded silently.</td>
+          </tr>
+          <tr>
+            <td class="k">Currency</td>
+            <td>Single implicit currency. Out of scope, named in next steps.</td>
+            <td>Adding a currency column without conversion rules is theatre.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. Locking and data model -->
+  <section id="design">
+    <div class="sec-head">
+      <h2>Locking strategy and schema</h2>
+      <p>The one design decision that shapes everything else. Pick it, write down why, and name the alternatives you rejected.</p>
+    </div>
+    <div class="cols">
+      <div class="block">
+        <h3>Pessimistic row locks, one transaction per money movement</h3>
+        <p>Every service method opens a Sequelize transaction, locks the rows it will change with <code>lock: t.LOCK.UPDATE</code>, checks, writes, commits. Postgres serialises concurrent callers on the locked row, so the second delivery or the second wager observes the first one's committed result.</p>
+        <p><b>Lock order is fixed:</b> funding transaction first, then wallet. Wagers and withdrawals lock only the wallet. No path locks in the other order, so no deadlock is possible.</p>
+        <p><b>Rejected:</b> <code>SERIALIZABLE</code> with retry loops adds a retry layer a junior will get wrong and gives no benefit at this scale. Optimistic versioning makes hot wallets retry-storm under load and moves the correctness burden to every caller. Both are worth one paragraph in DECISIONS.md.</p>
+        <p><b>Test harness detail:</b> Sequelize's default pool is 5 connections. With ten concurrent requests, five queue on the pool before they ever reach the lock. Raise <code>pool.max</code> to at least the concurrency you test with in the test config, so the race is real and the lock is what serialises it.</p>
+      </div>
+      <div class="block">
+        <h3>Schema additions, three migrations</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Table</th><th>Key columns</th></tr></thead>
+            <tbody>
+              <tr><td class="k">funding_txs</td><td>id, wallet_id, kind (deposit | withdrawal), status (Pending | Completed | Failed), amount, settled_amount, amount_mismatch, psp_ref <b>unique</b>, turnover_multiplier, created_at, updated_at</td></tr>
+              <tr><td class="k">wallet_txs</td><td>id, wallet_id, funding_tx_id nullable, kind (deposit_credit | wager_debit | withdrawal_debit), amount signed, balance_after, created_at. No updated_at: the row is never updated.</td></tr>
+              <tr><td class="k">psp_callbacks</td><td>id, psp_ref, payload jsonb, outcome (applied | duplicate | orphan | rejected), received_at. Raw inbox; also the seed for Part B's replay harness.</td></tr>
+              <tr><td class="k">wallets (alter)</td><td>turnover_required, turnover_accrued, <code>CHECK (balance &gt;= 0)</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="why">Materialised balance plus append-only ledger, rather than ledger-only, keeps every read a single row and keeps the invariant provable with one SUM. <code>balance_after</code> on each ledger row makes any drift locatable to the exact entry.</p>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Funding transaction state machine</h3>
+<pre class="state"><code>                      callback completed
+  POST /deposits ──▶ Pending ─────────────────▶ Completed   (credit wallet, add amount × multiplier
+                        │                                    to turnover_required, ledger row)
+                        │ callback failed
+                        └───────────────────▶ Failed        (no balance change)
+
+  Terminal states accept a repeat of the same outcome as a 200 no-op
+  and reject a different outcome with 409. Nothing leaves a terminal state.
+
+  POST /withdrawals ─▶ Pending   (wallet debited immediately; approval is out of scope)</code></pre>
+    </div>
+
+    <div class="block">
+      <h3>Error model</h3>
+      <p>One <code>DomainError</code> base class carrying an HTTP status and a stable <code>code</code>, mapped in the existing error handler in <code>app.ts</code>. Routes stay as thin as the starter's members route.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Code</th><th>Status</th><th>Body</th></tr></thead>
+          <tbody>
+            <tr><td class="k mono">validation_error</td><td>400</td><td>Zod issues, as the starter already does.</td></tr>
+            <tr><td class="k mono">not_found</td><td>404</td><td>member, wallet, or pspRef</td></tr>
+            <tr><td class="k mono">invalid_transition</td><td>409</td><td><code>{ from, to }</code></td></tr>
+            <tr><td class="k mono">insufficient_balance</td><td>422</td><td><code>{ balance, requested }</code></td></tr>
+            <tr><td class="k mono">turnover_not_met</td><td>422</td><td><code>{ required, accrued, outstanding }</code> as decimal strings</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Phased plan -->
+  <section id="plan">
+    <div class="sec-head">
+      <h2>Timeboxed build order</h2>
+      <p>One commit per phase, DECISIONS.md touched in most of them. Boxes persist in this browser only. The hard stop rule is at the end of the list; read it first.</p>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head"><span class="phase-num">0</span><h3>Setup and baseline</h3><span class="phase-time">10 min · 0:00 to 0:10</span></div>
+      <div class="phase-body">
+        <ul class="checks">
+          <li><input type="checkbox" id="p0a"><label for="p0a">Create your own repository with the template button. Not a fork, no pull request or issue against the source.</label></li>
+          <li><input type="checkbox" id="p0b"><label for="p0b">In <code>starter/</code>: copy <code>.env.example</code>, <code>npm install</code>, <code>npm run db:up</code>, <code>npm run db:migrate</code>, <code>npm test</code> green.</label></li>
+          <li><input type="checkbox" id="p0c"><label for="p0c">Create <code>DECISIONS.md</code> with headings only: Invariants, Locking, Schema, Rulings, Testing, AI tools, Next steps. Fill as you go.</label></li>
+        </ul>
+        <div class="commit"><span class="eyebrow">commit</span><code>chore: baseline starter, add DECISIONS skeleton</code></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head"><span class="phase-num">1</span><h3>Migrations and models</h3><span class="phase-time">30 min · 0:10 to 0:40</span></div>
+      <div class="phase-body">
+        <ul class="checks">
+          <li><input type="checkbox" id="p1a"><label for="p1a">Migration: <code>funding_txs</code> with enum status, unique <code>psp_ref</code>, DECIMAL(36,18) amounts.</label></li>
+          <li><input type="checkbox" id="p1b"><label for="p1b">Migration: <code>wallet_txs</code> ledger and <code>psp_callbacks</code> inbox.</label></li>
+          <li><input type="checkbox" id="p1c"><label for="p1c">Migration: alter <code>wallets</code> with turnover counters and the balance CHECK.</label></li>
+          <li><input type="checkbox" id="p1d"><label for="p1d">Sequelize models with <code>declare</code> string fields for money, associations in <code>models/index.ts</code>. Run <code>npm test</code> to confirm the test DB migrates.</label></li>
+        </ul>
+        <p class="why">Keep each migration reversible. Reviewers read migrations as the data model; they should be legible without opening the models.</p>
+        <div class="commit"><span class="eyebrow">commit</span><code>feat(db): funding transactions, append-only ledger, callback inbox, turnover counters</code></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head"><span class="phase-num">2</span><h3>A1 · Create deposit</h3><span class="phase-time">15 min · 0:40 to 0:55</span></div>
+      <div class="phase-body">
+        <ul class="checks">
+          <li><input type="checkbox" id="p2a"><label for="p2a">Zod body: <code>memberId</code> uuid, <code>amount</code> decimal string regex and positive, <code>turnoverMultiplier</code> int ≥ 0 default 1.</label></li>
+          <li><input type="checkbox" id="p2b"><label for="p2b"><code>fundingService.createDeposit</code>: resolve wallet by member (404), generate <code>pspRef</code> with <code>crypto.randomUUID()</code>, insert Pending. Single row, no lock needed.</label></li>
+          <li><input type="checkbox" id="p2c"><label for="p2c">Route returns <code>201 { id, pspRef, status, amount }</code>. Add <code>DomainError</code> and the handler mapping now.</label></li>
+        </ul>
+        <div class="commit"><span class="eyebrow">commit</span><code>feat(deposits): create pending deposit with PSP reference</code></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head"><span class="phase-num">3</span><h3>A2 · PSP callback</h3><span class="phase-time">45 min · 0:55 to 1:40</span></div>
+      <div class="phase-body">
+        <ul class="checks">
+          <li><input type="checkbox" id="p3a"><label for="p3a">Insert the raw callback into <code>psp_callbacks</code> first, outside the money transaction, so even a crash mid-processing leaves evidence.</label></li>
+          <li><input type="checkbox" id="p3b"><label for="p3b">Open one transaction. <code>FundingTx.findOne({ where: { pspRef }, lock: t.LOCK.UPDATE, transaction: t })</code>. Null: mark inbox orphan, 404.</label></li>
+          <li><input type="checkbox" id="p3c"><label for="p3c">State guard via a single <code>transition()</code> function. Same-outcome repeat: mark inbox duplicate, return 200 with current state. Conflict: mark rejected, throw 409.</label></li>
+          <li><input type="checkbox" id="p3d"><label for="p3d">On completed: lock wallet, credit settled amount, add <code>settled × multiplier</code> to <code>turnover_required</code>, insert ledger row with <code>balance_after</code>, set Completed. Record mismatch flag if amounts differ.</label></li>
+          <li><input type="checkbox" id="p3e"><label for="p3e">On failed: set Failed, no wallet touch, ledger untouched.</label></li>
+          <li><input type="checkbox" id="p3f"><label for="p3f">Write the sequential duplicate test now and run it. Do not leave the callback untested until phase 6.</label></li>
+        </ul>
+        <div class="note">
+          <b>Why this is exactly-once</b>
+          <p>The row lock makes concurrent deliveries take turns. The state guard makes every turn after the first a read-only no-op. The unique index makes it impossible to have two funding rows to race between. Any one of the three could fail and the other two still hold. Say this in DECISIONS.md in these words.</p>
+        </div>
+        <div class="commit"><span class="eyebrow">commit</span><code>feat(psp): idempotent callback handling with explicit state machine and ledger</code></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head"><span class="phase-num">4</span><h3>A3 · Wagers</h3><span class="phase-time">20 min · 1:40 to 2:00</span></div>
+      <div class="phase-body">
+        <ul class="checks">
+          <li><input type="checkbox" id="p4a"><label for="p4a">Lock wallet by id (404 if missing). Compare with <code>dec(balance).lt(amount)</code>, throw 422 insufficient_balance.</label></li>
+          <li><input type="checkbox" id="p4b"><label for="p4b">Debit, add amount to <code>turnover_accrued</code>, insert ledger row kind <code>wager_debit</code>, all in the one transaction.</label></li>
+          <li><input type="checkbox" id="p4c"><label for="p4c">Return <code>201 { walletId, balance, turnoverAccrued }</code>.</label></li>
+        </ul>
+        <div class="commit"><span class="eyebrow">commit</span><code>feat(wagers): debit under row lock and accrue turnover</code></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head"><span class="phase-num">5</span><h3>A4 · Withdrawals with turnover lock</h3><span class="phase-time">20 min · 2:00 to 2:20</span></div>
+      <div class="phase-body">
+        <ul class="checks">
+          <li><input type="checkbox" id="p5a"><label for="p5a">Lock wallet by member. If accrued &lt; required, throw 422 <code>turnover_not_met</code> with required, accrued, outstanding as strings.</label></li>
+          <li><input type="checkbox" id="p5b"><label for="p5b">Then the balance check. Debit, ledger row kind <code>withdrawal_debit</code>, insert Pending withdrawal funding row, one transaction.</label></li>
+          <li><input type="checkbox" id="p5c"><label for="p5c">Return <code>201 { id, status: 'Pending', amount, balance }</code>.</label></li>
+        </ul>
+        <div class="commit"><span class="eyebrow">commit</span><code>feat(withdrawals): enforce turnover requirement before pending payout</code></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head"><span class="phase-num">6</span><h3>A5 · Tests that prove the invariants</h3><span class="phase-time">40 min · 2:20 to 3:00</span></div>
+      <div class="phase-body">
+        <p>One file per concern, a small helper that creates a member, deposits, and completes the callback. Real Postgres, no mocks; the harness already migrates a test database.</p>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Test</th><th>Scenario</th><th>Assertions</th></tr></thead>
+            <tbody>
+              <tr><td class="k">Sequential duplicate</td><td>Complete the same callback twice.</td><td>Both 200. One ledger row. Balance equals amount. Inbox shows applied then duplicate.</td></tr>
+              <tr><td class="k">Concurrent duplicate</td><td><code>Promise.all</code> of 10 identical callbacks.</td><td>All 200. One ledger row. Balance equals amount once. This is the test the whole exercise rests on.</td></tr>
+              <tr><td class="k">Concurrent wagers</td><td>Balance 100, 10 concurrent wagers of 15.</td><td>Exactly 6 return 201 and 4 return 422. Balance is 10. Ledger sums to balance.</td></tr>
+              <tr><td class="k">Turnover blocks then unblocks</td><td>Deposit 100 with multiplier 0, deposit 100 with multiplier 1. Wager 60. Withdraw 50. Wager 40. Withdraw 50.</td><td>First withdrawal 422 with outstanding 40. Second withdrawal 201. Balance 50. Also exercises multiplier 0.</td></tr>
+              <tr><td class="k">Ledger invariant</td><td>Reuse the turnover scenario.</td><td><code>SUM(wallet_txs.amount)</code> equals balance; latest <code>balance_after</code> equals balance.</td></tr>
+              <tr><td class="k">State machine</td><td>Complete, then send failed. Fail, then send completed.</td><td>409 each time. Balance and ledger unchanged.</td></tr>
+              <tr><td class="k">Amount mismatch</td><td>Deposit 100, callback 90.</td><td>Balance 90, <code>settled_amount</code> 90, mismatch flag true.</td></tr>
+              <tr><td class="k">Unknown pspRef</td><td>Callback for a random ref.</td><td>404, orphan row in inbox.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note warn">
+          <b>Common way this goes wrong</b>
+          <p>A concurrency test that awaits requests in a loop is a sequential test with a misleading name. Build the array of promises first, then await them together. Check the pool size note above, and assert exact counts of successes and failures rather than "at least one".</p>
+        </div>
+        <div class="commit"><span class="eyebrow">commit</span><code>test: concurrency, idempotency, turnover lock and ledger invariants</code></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head"><span class="phase-num">7</span><h3>DECISIONS.md final pass</h3><span class="phase-time">15 min · 3:00 to 3:15</span></div>
+      <div class="phase-body">
+        <p>Most of it exists by now. This pass is editing, not writing. Target one to two pages.</p>
+        <ul class="checks">
+          <li><input type="checkbox" id="p7a"><label for="p7a"><b>Invariants</b>: the six rows above, one line each.</label></li>
+          <li><input type="checkbox" id="p7b"><label for="p7b"><b>Locking</b>: pessimistic row locks, fixed lock order, why not SERIALIZABLE or optimistic versioning, where this stops scaling (hot wallets, long-held locks under slow PSP calls) and what replaces it (per-wallet queue or single-writer partition).</label></li>
+          <li><input type="checkbox" id="p7c"><label for="p7c"><b>Schema</b>: materialised balance plus ledger, balance_after, inbox table, why turnover counters instead of derived sums.</label></li>
+          <li><input type="checkbox" id="p7d"><label for="p7d"><b>Rulings</b>: the ten rows from the rulings table, as applied.</label></li>
+          <li><input type="checkbox" id="p7e"><label for="p7e"><b>AI tools</b>: what you used them for, specifically. Planning, boilerplate, test scaffolding, review. Nothing you cannot defend line by line in the interview.</label></li>
+          <li><input type="checkbox" id="p7f"><label for="p7f"><b>Next steps</b>: review state for mismatches, reconciliation job against PSP settlement reports, outbox for side effects, withdrawal approval and PSP payout callback, currency, idempotency key on deposit creation, structured logging with pspRef as correlation id.</label></li>
+        </ul>
+        <div class="commit"><span class="eyebrow">commit</span><code>docs: decisions, trade-offs and next steps</code></div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head"><span class="phase-num">8</span><h3>Part B · DESIGN-PSP.md</h3><span class="phase-time">45 min · 3:15 to 4:00</span></div>
+      <div class="phase-body">
+        <p>One page and one sketch. The question is how a junior ships PSP number fifty in a day without being able to break the wallet. Answer it in that order: what they write, what stops them breaking things, how they prove it works.</p>
+        <div class="cols">
+          <div class="block">
+            <h3>Structure to describe</h3>
+            <ul>
+              <li><b>Adapter interface.</b> <code>verify(raw) → payload</code> and <code>normalize(payload) → PspEvent</code>. Adapters never import wallet code.</li>
+              <li><b>Canonical event.</b> <code>{ provider, pspRef, providerEventId, status: pending | completed | failed, amount in major units as string, currency, receivedAt, raw }</code>. The A2 service becomes <code>applyPspEvent(event)</code> and is provider-blind.</li>
+              <li><b>Pipeline.</b> <code>POST /psp/:provider/callbacks</code> → registry lookup → persist raw inbox row → verify → normalize → apply. Verification and normalization live at the edge; the core sees only canonical events.</li>
+              <li><b>Quirks die at the edge.</b> Minor units become a <code>unitScale</code> config. Status vocabularies become a <code>statusMap</code>. Out-of-order success-before-pending is absorbed because the core state machine is monotonic and ignores regressions.</li>
+              <li><b>Config over code.</b> A declarative adapter (HMAC header name, secret ref, JSON paths, unit scale, status map, ack policy) covers most providers with a config file and zero code. Custom classes only for the strange ones.</li>
+            </ul>
+          </div>
+          <div class="block">
+            <h3>Safety and testing to describe</h3>
+            <ul>
+              <li><b>Contract test suite.</b> Every adapter must pass one shared suite fed by a fixtures directory: valid, tampered signature, duplicate, minor units, out-of-order, unknown ref. CI runs it with no network.</li>
+              <li><b>Recorded fixtures.</b> Captured from the provider sandbox and from the production inbox table, redacted. The inbox from Part A is the replay source.</li>
+              <li><b>Sandbox smoke</b> nightly and non-blocking; the provider's uptime is not your CI's problem.</li>
+              <li><b>Shadow mode.</b> New adapters roll out in observe mode: verify, normalize, log, do not apply. Flip to live per provider by config.</li>
+              <li><b>Guardrails.</b> Code owners on the core wallet path, an adapter template generator, and a one-day checklist: morning is fixtures, config and adapter; afternoon is contract suite green, shadow mode in staging, PR.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="why">The sketch is the pipeline above as a single flow diagram with a bold line between "adapter" and "core". That line is the whole argument.</p>
+        <div class="commit"><span class="eyebrow">commit</span><code>docs: PSP integration design note</code></div>
+      </div>
+    </div>
+
+    <div class="note crit">
+      <b>Hard stop rule</b>
+      <p>At 3:15 by the clock, stop writing code whatever state it is in. Failing tests stay failing with a comment. The two documents are weighted more heavily than the last endpoint, and the root readme requires every part to be at least attempted. An honest "did not finish A4, here is how I would" beats a silent gap. Write the design note before polishing anything.</p>
+    </div>
+  </section>
+
+  <!-- 6. Pre-submission review -->
+  <section id="review">
+    <div class="sec-head">
+      <h2>Pre-submission review</h2>
+      <p>Fifteen minutes of slack at the end is for this list, not for features.</p>
+    </div>
+    <div class="cols">
+      <div class="block">
+        <h3>It runs for a stranger</h3>
+        <ul class="checks">
+          <li><input type="checkbox" id="r1"><label for="r1">Fresh clone into a new directory: <code>npm install</code>, <code>db:up</code>, <code>npm test</code> passes with no manual steps beyond the README.</label></li>
+          <li><input type="checkbox" id="r2"><label for="r2">Starter README extended with the new endpoints and one curl sequence: deposit, callback, wager, withdrawal.</label></li>
+          <li><input type="checkbox" id="r3"><label for="r3"><code>.env</code> not committed. No secrets, no <code>node_modules</code>.</label></li>
+          <li><input type="checkbox" id="r4"><label for="r4">Migrations roll down cleanly once.</label></li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>It reads like a lead wrote it</h3>
+        <ul class="checks">
+          <li><input type="checkbox" id="r5"><label for="r5"><code>grep -rn "parseFloat\|Number(\|toFixed" src/</code> returns nothing money-related.</label></li>
+          <li><input type="checkbox" id="r6"><label for="r6">Every balance write is inside a transaction with a lock. Search for <code>balance</code> assignments to confirm.</label></li>
+          <li><input type="checkbox" id="r7"><label for="r7"><code>git log --oneline</code> tells the story in under ten lines. No "wip" or "fix" commits without a noun.</label></li>
+          <li><input type="checkbox" id="r8"><label for="r8">DECISIONS.md has all seven sections filled and the AI disclosure is specific.</label></li>
+          <li><input type="checkbox" id="r9"><label for="r9">DESIGN-PSP.md is at most one page plus the sketch. Cut, do not shrink the font.</label></li>
+          <li><input type="checkbox" id="r10"><label for="r10">Nothing was added that the brief did not ask for: no queue, no event bus, no auth, no Docker changes beyond the pool size.</label></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Risk register -->
+  <section id="risks">
+    <div class="sec-head">
+      <h2>Where this exercise fails people</h2>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Risk</th><th>Severity</th><th>Mitigation in this plan</th></tr></thead>
+        <tbody>
+          <tr><td>Check-then-act race on the callback double-credits</td><td><span class="tag crit">incident</span></td><td>Row lock plus state guard plus unique index (phase 3), proven by the concurrent duplicate test.</td></tr>
+          <tr><td>Concurrent wagers overdraw</td><td><span class="tag crit">incident</span></td><td>Balance compared under FOR UPDATE, CHECK constraint as the last line, exact-count test.</td></tr>
+          <tr><td>Ledger drifts from balance</td><td><span class="tag crit">incident</span></td><td>Ledger row and balance write share one transaction; SUM invariant test.</td></tr>
+          <tr><td>Concurrency tests that are not concurrent</td><td><span class="tag warn">unproven claims</span></td><td>Promise array built before awaiting; pool size raised; exact success counts asserted.</td></tr>
+          <tr><td>Deadlock from mixed lock order</td><td><span class="tag warn">flaky</span></td><td>Single documented order: funding row, then wallet.</td></tr>
+          <tr><td>Over-engineering eats the clock</td><td><span class="tag warn">time</span></td><td>Brief lists what is not graded. Hard stop at 3:15. Nothing beyond the schema above.</td></tr>
+          <tr><td>Thin DECISIONS.md</td><td><span class="tag crit">red flag</span></td><td>Skeleton in phase 0, rulings recorded as applied, edit pass in phase 7.</td></tr>
+          <tr><td>Part B missing or generic</td><td><span class="tag crit">fail</span></td><td>45 minutes protected at the end; outline fixed above so writing is filling in, not thinking from zero.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="foot">Source: backend-lead/readme.md, starter/README.md and the starter code, read 2026-09-11. Checkbox state lives only in this browser.</div>
+</div>
+
+<script>
+  (function () {
+    var KEY = 'mini-wallet-plan-v2';
+    var boxes = document.querySelectorAll('.checks input[type="checkbox"]');
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
+    boxes.forEach(function (b) {
+      if (saved[b.id]) b.checked = true;
+      b.addEventListener('change', function () {
+        saved[b.id] = b.checked;
+        try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+      });
+    });
+  })();
+</script>
