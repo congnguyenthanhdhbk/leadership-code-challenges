@@ -7,6 +7,9 @@ export {
   selectWagersFor,
   selectWithdrawalsFor,
   selectDepositByPspRef,
+  useDepositsFor,
+  useWagersFor,
+  useWithdrawalsFor,
 } from './transactionStore';
 export type { DepositRecord, WagerRecord, WithdrawalRecord, CallbackDelivery } from './transactionStore';
 

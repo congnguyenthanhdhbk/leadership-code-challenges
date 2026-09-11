@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import type { CallbackStatus, FundingTxStatus, Money } from '@/lib/api/types';
 import { persistOptions } from './persist';
 
@@ -106,14 +107,31 @@ export const useTransactionStore = create<TransactionState>()(
   ),
 );
 
+// These selectors filter, so they return a new array on every call. Components must not
+// pass them to useTransactionStore directly: React would see a new snapshot each render
+// and loop. Use the hooks below, which compare the result shallowly.
+const EMPTY: never[] = [];
+
 export const selectDepositsFor = (memberId: string | null) => (s: TransactionState) =>
-  memberId ? s.deposits.filter((d) => d.memberId === memberId) : [];
+  memberId ? s.deposits.filter((d) => d.memberId === memberId) : EMPTY;
 
 export const selectWagersFor = (memberId: string | null) => (s: TransactionState) =>
-  memberId ? s.wagers.filter((w) => w.memberId === memberId) : [];
+  memberId ? s.wagers.filter((w) => w.memberId === memberId) : EMPTY;
 
 export const selectWithdrawalsFor = (memberId: string | null) => (s: TransactionState) =>
-  memberId ? s.withdrawals.filter((w) => w.memberId === memberId) : [];
+  memberId ? s.withdrawals.filter((w) => w.memberId === memberId) : EMPTY;
 
 export const selectDepositByPspRef = (pspRef: string) => (s: TransactionState) =>
   s.deposits.find((d) => d.pspRef === pspRef) ?? null;
+
+export function useDepositsFor(memberId: string | null): DepositRecord[] {
+  return useTransactionStore(useShallow(selectDepositsFor(memberId)));
+}
+
+export function useWagersFor(memberId: string | null): WagerRecord[] {
+  return useTransactionStore(useShallow(selectWagersFor(memberId)));
+}
+
+export function useWithdrawalsFor(memberId: string | null): WithdrawalRecord[] {
+  return useTransactionStore(useShallow(selectWithdrawalsFor(memberId)));
+}

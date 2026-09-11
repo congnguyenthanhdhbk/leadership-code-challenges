@@ -10,11 +10,11 @@ import { Money } from '@/components/ui/Money';
 import { formatDateTime, formatTime } from '@/lib/format';
 import { useOperationsStore, selectBusy } from '@/store/operationsStore';
 import { useSessionStore } from '@/store/sessionStore';
-import { useTransactionStore, selectDepositsFor, type DepositRecord } from '@/store/transactionStore';
+import { useDepositsFor, type DepositRecord } from '@/store/transactionStore';
 
 export function DepositList() {
   const memberId = useSessionStore((s) => s.activeMemberId);
-  const deposits = useTransactionStore(selectDepositsFor(memberId));
+  const deposits = useDepositsFor(memberId);
 
   return (
     <Card
